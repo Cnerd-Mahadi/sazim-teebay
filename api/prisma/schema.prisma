@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email String @unique
+  password String
+  profile Profile @relation(fields: [profileId], references: [id])
+  profileId String @unique
+  buyer ProductSold? @relation(name: "buyer")
+  seller ProductSold? @relation(name: "seller")
+  owner ProductRented? @relation(name: "owner")
+  renter ProductRented? @relation(name: "renter")
+}
+
+model Profile{
+  id String @unique
+  fname String
+  lname String
+  address String
+  phone String
+  user User?
+}
+
+model Product{
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title String @unique
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId String @db.Uuid @unique 
+  brand Brand @relation(fields: [brandId], references: [id])
+  brandId String @db.Uuid @unique
+  price Int
+  rentPerHour Int
+  viewCount Int
+  productSold ProductSold?
+  productRented ProductRented?
+}
+model Brand{
+id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+name String @unique
+products Product[]
+}
+
+model Category{
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type String @unique
+  products Product[]
+}
+
+model ProductSold{
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product Product @relation(fields: [productId], references: [id])
+  productId String @db.Uuid @unique
+  seller User @relation("seller", fields: [sellerId], references: [id])
+  sellerId  String @db.Uuid @unique
+  buyer User @relation("buyer", fields: [buyerId], references: [id])
+  buyerId String @db.Uuid @unique
+}
+
+model ProductRented{
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product Product @relation(fields: [productId], references: [id])
+  productId String @db.Uuid @unique
+  owner User @relation("owner", fields: [ownerId], references: [id])
+  ownerId  String @db.Uuid @unique
+  renter User @relation("renter", fields: [renterId], references: [id])
+  renterId String @db.Uuid @unique
+  rentingTime DateTime
+  rentHourDuration Int 
+}
