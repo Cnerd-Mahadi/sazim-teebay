@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @db.Uuid @unique
   email String @unique
   password String
-  profile Profile @relation(fields: [profileId], references: [id])
-  profileId String @unique
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId String @db.Uuid @unique
+  products Product[]
   buyer ProductSold? @relation(name: "buyer")
   seller ProductSold? @relation(name: "seller")
   owner ProductRented? @relation(name: "owner")
@@ -26,7 +27,7 @@ model User {
 }
 
 model Profile{
-  id String @unique
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   fname String
   lname String
   address String
@@ -37,13 +38,17 @@ model Profile{
 model Product{
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title String @unique
-  category Category @relation(fields: [categoryId], references: [id])
-  categoryId String @db.Uuid @unique 
-  brand Brand @relation(fields: [brandId], references: [id])
-  brandId String @db.Uuid @unique
+  desc String 
+  categories CategoriesOnProducts[]
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  brandId String @db.Uuid
+  owner User @relation(fields: [ownerId], references: [id], onDelete: NoAction)
+  ownerId String @db.Uuid 
   price Int
   rentPerHour Int
   viewCount Int
+  showDay Boolean
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
   productSold ProductSold?
   productRented ProductRented?
 }
@@ -56,27 +61,36 @@ products Product[]
 model Category{
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type String @unique
-  products Product[]
+  products CategoriesOnProducts[]
+}
+
+model CategoriesOnProducts {
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String @db.Uuid
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId String @db.Uuid
+
+   @@id([productId, categoryId])
 }
 
 model ProductSold{
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: NoAction)
   productId String @db.Uuid @unique
-  seller User @relation("seller", fields: [sellerId], references: [id])
+  seller User @relation("seller", fields: [sellerId], references: [id], onDelete: NoAction)
   sellerId  String @db.Uuid @unique
-  buyer User @relation("buyer", fields: [buyerId], references: [id])
+  buyer User @relation("buyer", fields: [buyerId], references: [id], onDelete: NoAction)
   buyerId String @db.Uuid @unique
 }
 
 model ProductRented{
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: NoAction)
   productId String @db.Uuid @unique
-  owner User @relation("owner", fields: [ownerId], references: [id])
+  owner User @relation("owner", fields: [ownerId], references: [id], onDelete: NoAction)
   ownerId  String @db.Uuid @unique
-  renter User @relation("renter", fields: [renterId], references: [id])
+  renter User @relation("renter", fields: [renterId], references: [id], onDelete: NoAction)
   renterId String @db.Uuid @unique
-  rentingTime DateTime
+  rentingTime DateTime @default(now()) @db.Timestamptz(6)
   rentHourDuration Int 
 }

@@ -1,7 +1,39 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
+import {
+	addProduct,
+	buyProduct,
+	editProduct,
+	getAllProducts,
+	rentProduct,
+} from "../controller/product.controller";
+import {
+	deleteProduct,
+	getProductsBoughtByUser,
+	getProductsByUser,
+	getProductsLentByUser,
+	getProductsRentedtByUser,
+	getProductsSoldByUser,
+	signInUser,
+	signUpUser,
+} from "../controller/user.controller";
+import { authMiddleware } from "../middlewares/api.middleware";
 
 export const router = Router();
 
-router.get("/me", (req: Request, res: Response) => {
-	res.send("Yeah all working fine!");
-});
+//public
+router.post("/signup", signUpUser);
+router.post("/signin", signInUser);
+
+//authed
+router.get("/products", authMiddleware, getAllProducts);
+router.post("/addProduct", authMiddleware, addProduct);
+router.put("/editProduct", authMiddleware, editProduct);
+router.post("/buyProduct", authMiddleware, buyProduct);
+router.post("/rentProduct", authMiddleware, rentProduct);
+
+router.get("/products", authMiddleware, getProductsByUser);
+router.get("/productsBought", authMiddleware, getProductsBoughtByUser);
+router.get("/productsSold", authMiddleware, getProductsSoldByUser);
+router.get("/productsRented", authMiddleware, getProductsRentedtByUser);
+router.get("/productsLent", authMiddleware, getProductsLentByUser);
+router.delete("/:productId", authMiddleware, deleteProduct);
