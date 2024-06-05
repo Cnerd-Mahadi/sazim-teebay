@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
 import { parsedENV } from "..";
 
-export function getToken(username: string) {
+export function getToken(email: string) {
+	console.log(email, "Email");
 	const token = jwt.sign(
 		{
-			username: username,
+			email: email,
 		},
 		parsedENV.JWT_SECRET
 	);

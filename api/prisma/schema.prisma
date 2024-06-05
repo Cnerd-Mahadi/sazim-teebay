@@ -75,7 +75,7 @@ model CategoriesOnProducts {
 
 model ProductSold{
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  product Product @relation(fields: [productId], references: [id], onDelete: NoAction)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String @db.Uuid @unique
   seller User @relation("seller", fields: [sellerId], references: [id], onDelete: NoAction)
   sellerId  String @db.Uuid @unique
@@ -85,7 +85,7 @@ model ProductSold{
 
 model ProductRented{
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  product Product @relation(fields: [productId], references: [id], onDelete: NoAction)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String @db.Uuid @unique
   owner User @relation("owner", fields: [ownerId], references: [id], onDelete: NoAction)
   ownerId  String @db.Uuid @unique

@@ -11,6 +11,7 @@ export async function authMiddleware(
 ) {
 	const bearer = req.headers.authorization;
 	const decoded = verifyToken(bearer);
+	console.log(decoded);
 	if (decoded) {
 		const user = await getUserbyEmail((decoded as JwtPayload).email);
 		return user

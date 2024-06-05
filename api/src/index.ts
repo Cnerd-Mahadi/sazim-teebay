@@ -1,4 +1,5 @@
 import bodyParser from "body-parser";
+import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import { envSchema } from "./lib/zod/env";
@@ -11,6 +12,7 @@ export const parsedENV = envSchema.parse({
 	JWT_SECRET: process.env.JWT_SECRET,
 });
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use("/api/v1", router);
 

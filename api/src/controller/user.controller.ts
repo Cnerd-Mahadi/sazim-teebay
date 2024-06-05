@@ -16,7 +16,7 @@ export async function signUpUser(req: Request, res: Response) {
 		email: body.email,
 		password: body.password,
 	};
-	const refined = userSchema.safeParse(raw);
+	const refined = await userSchema.safeParseAsync(raw);
 	if (refined.success) {
 		try {
 			const { fname, lname, address, phone, email, password } = refined.data;
@@ -44,9 +44,10 @@ export async function signUpUser(req: Request, res: Response) {
 				.json({ msg: "User created successfully" });
 		} catch (error) {
 			console.error(error);
-			return res
-				.status(StatusCode.ServerError)
-				.json({ msg: "User couldnt be created" });
+			return res.status(StatusCode.ServerError).json({
+				msg: "User couldnt be created",
+				validation_error: refined.error,
+			});
 		}
 	}
 	return res.status(StatusCode.Invalid).json({
@@ -69,6 +70,7 @@ export async function signInUser(req: Request, res: Response) {
 			);
 			if (checkPass) {
 				const token = getToken(user.email);
+				console.log(user.email, user, token);
 				return res.status(StatusCode.Success).json({ token: token });
 			}
 			return res.status(StatusCode.Unauthorized).json({
@@ -91,6 +93,14 @@ export async function getProductsByUser(req: Request, res: Response) {
 			where: {
 				ownerId: user.id,
 			},
+			include: {
+				categories: {
+					include: {
+						category: true,
+					},
+				},
+				brand: true,
+			},
 		});
 		return res.status(StatusCode.Success).json(userProducts);
 	} catch (error) {
@@ -109,7 +119,16 @@ export async function getProductsSoldByUser(req: Request, res: Response) {
 				sellerId: user.id,
 			},
 			include: {
-				product: true,
+				product: {
+					include: {
+						categories: {
+							include: {
+								category: true,
+							},
+						},
+						brand: true,
+					},
+				},
 			},
 		});
 		return res.status(StatusCode.Success).json(userProductsSold);
@@ -129,7 +148,16 @@ export async function getProductsBoughtByUser(req: Request, res: Response) {
 				buyerId: user.id,
 			},
 			include: {
-				product: true,
+				product: {
+					include: {
+						categories: {
+							include: {
+								category: true,
+							},
+						},
+						brand: true,
+					},
+				},
 			},
 		});
 		return res.status(StatusCode.Success).json(userProductsBought);
@@ -149,7 +177,16 @@ export async function getProductsRentedtByUser(req: Request, res: Response) {
 				renterId: user.id,
 			},
 			include: {
-				product: true,
+				product: {
+					include: {
+						categories: {
+							include: {
+								category: true,
+							},
+						},
+						brand: true,
+					},
+				},
 			},
 		});
 		return res.status(StatusCode.Success).json(userProductsRented);
@@ -169,7 +206,16 @@ export async function getProductsLentByUser(req: Request, res: Response) {
 				ownerId: user.id,
 			},
 			include: {
-				product: true,
+				product: {
+					include: {
+						categories: {
+							include: {
+								category: true,
+							},
+						},
+						brand: true,
+					},
+				},
 			},
 		});
 		return res.status(StatusCode.Success).json(userProductsLent);
