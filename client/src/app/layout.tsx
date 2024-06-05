@@ -1,4 +1,6 @@
+import { ReactQueryProvider } from "@/contexts/react-query-provider";
 import type { Metadata } from "next";
+import { CookiesProvider } from "next-client-cookies/server";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -16,7 +18,11 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={inter.className}>{children}</body>
+			<body className={inter.className}>
+				<ReactQueryProvider>
+					<CookiesProvider>{children}</CookiesProvider>
+				</ReactQueryProvider>
+			</body>
 		</html>
 	);
 }

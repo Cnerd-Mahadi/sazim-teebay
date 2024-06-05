@@ -28,7 +28,11 @@ export const SignUpInputField = ({
 				<FormItem className="w-full">
 					<FormLabel>{label}</FormLabel>
 					<FormControl>
-						<Input {...field} placeholder={label} className="py-5 pr-10" />
+						<Input
+							{...field}
+							placeholder={label}
+							className="border-slate-300 shadow-none py-5 pr-10"
+						/>
 					</FormControl>
 					<FormMessage />
 				</FormItem>

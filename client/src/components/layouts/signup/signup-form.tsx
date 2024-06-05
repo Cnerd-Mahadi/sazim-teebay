@@ -1,16 +1,22 @@
 "use client";
 
+import { signUp } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { signUpFormSchema } from "@/lib/zod/user";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { SignUpInputField } from "./signup-input-field";
 import { SignUpInputPassword } from "./signup-input-password";
+
 const formSchema = signUpFormSchema;
 
 export const SignUpForm = () => {
+	const router = useRouter();
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -24,16 +30,25 @@ export const SignUpForm = () => {
 		},
 	});
 
-	// const { isPending, mutate } = useMutation({
-	// 	mutationFn: (values: z.infer<typeof formSchema>) => signUp(values),
-	// 	onSuccess: async (success) => {
-	// 		console.log(success);
-	// 	},
-	// });
+	const { isPending, mutate } = useMutation({
+		mutationFn: (values: z.infer<typeof formSchema>) => signUp(values),
+		onSuccess: async (data) => {
+			const validationError = data.error;
+			if (validationError) {
+				form.setError("email", {
+					type: "custom",
+					message: "Email already exists!",
+				});
+				throw new Error("Email already exists!");
+			} else {
+				console.log(data);
+				router.push("/signin");
+			}
+		},
+	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		// mutate(values);
-		// signUp(values);
+		mutate(values);
 	}
 	return (
 		<Form {...form}>
@@ -75,7 +90,11 @@ export const SignUpForm = () => {
 					<Button
 						type="submit"
 						size={"lg"}
-						className="flex flex-row bg-blue-500 hover:bg-blue-600 mx-auto w-full max-w-64">
+						disabled={form.formState.isSubmitting || isPending}
+						className="flex flex-row bg-violet-600 hover:bg-violet-500 mx-auto w-full max-w-64">
+						{(form.formState.isSubmitting || isPending) && (
+							<ReloadIcon className="mr-2 w-4 h-4 animate-spin" />
+						)}
 						Sign Up
 					</Button>
 				</div>

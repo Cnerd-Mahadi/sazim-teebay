@@ -1,9 +1,14 @@
 "use client";
 
+import { signIn } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { signInFormSchema } from "@/lib/zod/user";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { useMutation } from "@tanstack/react-query";
+import { useCookies } from "next-client-cookies";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { SignInInputField } from "./signin-input-field";
@@ -12,6 +17,8 @@ import { SignInInputPassword } from "./signin-input-password";
 const formSchema = signInFormSchema;
 
 export const SignInForm = () => {
+	const router = useRouter();
+	const cookies = useCookies();
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -19,9 +26,30 @@ export const SignInForm = () => {
 			password: "",
 		},
 	});
+
+	const { isPending, mutate } = useMutation({
+		mutationFn: (values: z.infer<typeof formSchema>) => signIn(values),
+		onSuccess: async (success) => {
+			const { data, response } = success;
+			if (response.status === 401) {
+				form.setError("password", {
+					type: "custom",
+					message: "Invalid credentials!",
+				});
+				throw new Error("Invalid credentials!");
+			} else {
+				const token = data.token;
+				if (!token) throw new Error("No token found!");
+				cookies.set("token", token);
+				router.push("/");
+			}
+		},
+	});
+
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
+		mutate(values);
 	}
+
 	return (
 		<Form {...form}>
 			<form
@@ -37,7 +65,11 @@ export const SignInForm = () => {
 					<Button
 						type="submit"
 						size={"lg"}
-						className="flex flex-row bg-blue-500 hover:bg-blue-600 mx-auto w-full max-w-64">
+						disabled={form.formState.isSubmitting || isPending}
+						className="flex flex-row bg-violet-600 hover:bg-violet-500 mx-auto w-full max-w-64">
+						{(form.formState.isSubmitting || isPending) && (
+							<ReloadIcon className="mr-2 w-4 h-4 animate-spin" />
+						)}
 						Sign In
 					</Button>
 				</div>

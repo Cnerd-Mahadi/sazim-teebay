@@ -36,7 +36,7 @@ export const SignUpInputPassword = ({
 								{...field}
 								type={showPass ? "text" : "password"}
 								placeholder={label}
-								className="py-5 pr-10"
+								className="border-slate-300 shadow-none py-5 pr-10"
 							/>
 							{showPass ? (
 								<EyeOpenIcon

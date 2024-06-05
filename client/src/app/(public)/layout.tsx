@@ -3,5 +3,5 @@ export default function PublicLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return <main>{children}</main>;
+	return <main className="bg-neutral-50">{children}</main>;
 }
