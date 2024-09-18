@@ -7,12 +7,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Cookies from "js-cookie";
 import { Power, UserCircle } from "lucide-react";
-import { useCookies } from "next-client-cookies";
 import { useRouter } from "next/navigation";
 
 export const UserDropdown = () => {
-	const cookies = useCookies();
 	const router = useRouter();
 	return (
 		<DropdownMenu>
@@ -26,7 +25,7 @@ export const UserDropdown = () => {
 				<DropdownMenuGroup>
 					<DropdownMenuItem
 						onClick={() => {
-							cookies.remove("token");
+							Cookies.remove("token");
 							router.push("/signin");
 						}}
 						className="cursor-pointer">

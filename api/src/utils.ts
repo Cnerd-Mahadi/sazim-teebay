@@ -1,4 +1,6 @@
 import bcrypt from "bcrypt";
+import "dotenv/config";
+import { envSchema } from "./lib/zod/env";
 
 export enum StatusCode {
 	NotFound = 404,
@@ -8,6 +10,11 @@ export enum StatusCode {
 	Unauthorized = 401,
 	ServerError = 500,
 }
+
+export const parsedENV = envSchema.parse({
+	DATABASE_URL: process.env.DATABASE_URL,
+	JWT_SECRET: process.env.JWT_SECRET,
+});
 
 export const getHashedPassword = async (password: string) => {
 	const salt = await bcrypt.genSalt(8);

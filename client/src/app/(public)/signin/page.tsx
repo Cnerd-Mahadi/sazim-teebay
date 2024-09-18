@@ -4,7 +4,8 @@ import { SignInForm } from "@/components/layouts/signin/signin-form";
 import { redirect } from "next/navigation";
 
 export default async function page() {
-	const userValid = isUserValid();
+	const userValid = await isUserValid();
+	console.log(userValid);
 	if (userValid) redirect("/");
 	return (
 		<main className="flex flex-row justify-center items-center py-10 min-h-screen">

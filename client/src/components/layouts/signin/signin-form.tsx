@@ -1,13 +1,13 @@
 "use client";
 
-import { signIn } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { formatZodCustomError } from "@/helpers";
 import { signInFormSchema } from "@/lib/zod/user";
+import { trpcClient } from "@/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { useMutation } from "@tanstack/react-query";
-import { useCookies } from "next-client-cookies";
+import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,7 +18,6 @@ const formSchema = signInFormSchema;
 
 export const SignInForm = () => {
 	const router = useRouter();
-	const cookies = useCookies();
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -27,21 +26,22 @@ export const SignInForm = () => {
 		},
 	});
 
-	const { isPending, mutate } = useMutation({
-		mutationFn: (values: z.infer<typeof formSchema>) => signIn(values),
-		onSuccess: async (success) => {
-			const { data, response } = success;
-			if (response.status === 401) {
+	const { isPending, mutate } = trpcClient.user.signIn.useMutation({
+		onSuccess: async (response) => {
+			if (response && response.token) {
+				Cookies.set("token", response.token);
+				router.push("/");
+			}
+		},
+		onError: async (response) => {
+			const validationError = formatZodCustomError(response.data?.zodError);
+			console.log(validationError);
+			if (validationError && validationError.type === "invalid-creds") {
 				form.setError("password", {
 					type: "custom",
-					message: "Invalid credentials!",
+					message: validationError.message,
 				});
-				throw new Error("Invalid credentials!");
-			} else {
-				const token = data.token;
-				if (!token) throw new Error("No token found!");
-				cookies.set("token", token);
-				router.push("/");
+				throw new Error(validationError.message);
 			}
 		},
 	});

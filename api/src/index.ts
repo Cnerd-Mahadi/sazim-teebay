@@ -1,21 +1,22 @@
-import bodyParser from "body-parser";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import cors from "cors";
-import "dotenv/config";
 import express from "express";
-import { envSchema } from "./lib/zod/env";
-import { router } from "./routes/index.route";
+import { appRouter } from "./routes/index.route";
+import { createContext } from "./trpc";
+
+const port = 3000;
 
 const app = express();
-const port = 3000;
-export const parsedENV = envSchema.parse({
-	DATABASE_URL: process.env.DATABASE_URL,
-	JWT_SECRET: process.env.JWT_SECRET,
-});
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use("/api/v1", router);
+app.use(
+	"/trpc/v1/",
+	createExpressMiddleware({
+		router: appRouter,
+		createContext,
+	})
+);
 
 app.listen(port, () => {
-	console.log(`port listening at ${port}`);
+	console.log(`listening to server at ${port}`);
 });

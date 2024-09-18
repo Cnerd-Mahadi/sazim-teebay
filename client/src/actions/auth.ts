@@ -1,13 +1,16 @@
-import { getCookies } from "next-client-cookies/server";
+import { getCookieServerSide } from "@/utils/cookie-server";
+import Cookies from "js-cookie";
 
-export const isUserValid = () => {
-	const token = getCookies().get("token");
+export const isUserValid = async () => {
+	const token = await getToken();
 	return token ? true : false;
 };
 
-export const getToken = () => {
-	console.log("HOLLY MECCA");
-	const token = getCookies().get("token");
-	if (!token) throw new Error("No token found!");
-	return token;
+export const getToken = async () => {
+	if (typeof window !== "undefined") {
+		return Cookies.get("token");
+	} else {
+		const token = await getCookieServerSide("token");
+		return token?.value;
+	}
 };

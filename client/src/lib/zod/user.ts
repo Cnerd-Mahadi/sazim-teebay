@@ -4,6 +4,7 @@ export const signUpFormSchema = z
 	.object({
 		fname: z.string().min(3),
 		lname: z.string().min(3),
+		dob: z.string().date(),
 		address: z.string().min(8),
 		phone: z.string().regex(/^01\d{9}$/),
 		email: z.string().email(),

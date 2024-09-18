@@ -1,8 +1,7 @@
-import jwt from "jsonwebtoken";
-import { parsedENV } from "..";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { parsedENV } from "../utils";
 
 export function getToken(email: string) {
-	console.log(email, "Email");
 	const token = jwt.sign(
 		{
 			email: email,
@@ -12,12 +11,14 @@ export function getToken(email: string) {
 	return token;
 }
 
-export function verifyToken(bearer: string | undefined) {
+export function verifyToken(bearer: string) {
 	try {
-		const token = bearer ? bearer.split(" ")[1] : undefined;
-		if (!token) return false;
-		console.log(token);
-		return jwt.verify(token, parsedENV.JWT_SECRET);
+		const token = bearer;
+		if (!token) {
+			return false;
+		}
+		const verified = jwt.verify(token, parsedENV.JWT_SECRET) as JwtPayload;
+		return verified;
 	} catch (error) {
 		console.log(error);
 		return false;

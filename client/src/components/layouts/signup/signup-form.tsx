@@ -1,15 +1,18 @@
 "use client";
 
-import { signUp } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { formatZodCustomError } from "@/helpers";
 import { signUpFormSchema } from "@/lib/zod/user";
+import { trpcClient } from "@/trpc";
+import { convertDateToString } from "@/utils/date-time";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { useMutation } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { DOBInputField } from "./dob-input-field";
 import { SignUpInputField } from "./signup-input-field";
 import { SignUpInputPassword } from "./signup-input-password";
 
@@ -17,12 +20,14 @@ const formSchema = signUpFormSchema;
 
 export const SignUpForm = () => {
 	const router = useRouter();
+	const dateInit = convertDateToString(dayjs());
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			fname: "",
 			lname: "",
 			address: "",
+			dob: dateInit,
 			email: "",
 			phone: "",
 			password: "",
@@ -30,24 +35,25 @@ export const SignUpForm = () => {
 		},
 	});
 
-	const { isPending, mutate } = useMutation({
-		mutationFn: (values: z.infer<typeof formSchema>) => signUp(values),
+	const { isPending, mutate } = trpcClient.user.signUp.useMutation({
 		onSuccess: async (data) => {
-			const validationError = data.error;
-			if (validationError) {
+			console.log("Success", data);
+			router.push("/signin");
+		},
+		onError: async (response) => {
+			const validationError = formatZodCustomError(response.data?.zodError);
+			if (validationError && validationError.type === "unique-email") {
 				form.setError("email", {
 					type: "custom",
-					message: "Email already exists!",
+					message: validationError.message,
 				});
-				throw new Error("Email already exists!");
-			} else {
-				console.log(data);
-				router.push("/signin");
+				throw new Error(validationError.message);
 			}
 		},
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
+		// console.log(values);
 		mutate(values);
 	}
 	return (
@@ -71,6 +77,11 @@ export const SignUpForm = () => {
 					control={form.control}
 					name="address"
 					label="Address"
+				/>
+				<DOBInputField
+					control={form.control}
+					name="dob"
+					label="Date of Birth"
 				/>
 				<div className="flex flex-row justify-stretch gap-6">
 					<SignUpInputField control={form.control} name="email" label="Email" />

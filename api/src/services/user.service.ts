@@ -13,14 +13,14 @@ export async function getUserbyEmail(email: string) {
 		return user ? user : false;
 	} catch (error) {
 		console.error(error);
+		return false;
 	}
 }
 
-export async function getCurrentUser(bearer: string | undefined) {
+export async function getCurrentUser(bearer: string) {
 	const decoded = verifyToken(bearer);
 	if (!decoded) throw new Error("Token wasn't valid!");
 	const user = await getUserbyEmail((decoded as JwtPayload).email);
-	// console.log(decode)
 	if (!user) throw new Error("No current user found");
 	return user;
 }
