@@ -1,6 +1,6 @@
+import { getUserbyEmail } from "@/services/user.service";
+import { middleware } from "@/trpc";
 import { TRPCError } from "@trpc/server";
-import { getUserbyEmail } from "../services/user.service";
-import { middleware } from "../trpc";
 
 export const authedMiddleware = middleware(async ({ ctx, next }) => {
 	if (!ctx.email) {

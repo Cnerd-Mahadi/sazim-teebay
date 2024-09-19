@@ -1,9 +1,9 @@
-import { credSchema, signUpSchema } from "../lib/zod/user";
-import { getToken } from "../services/auth.service";
-import { prisma } from "./../db/index.db";
-import { authedMiddleware } from "./../middlewares/index.middleware";
-import { publicProcedure } from "./../trpc";
-import { getHashedPassword } from "./../utils";
+import { prisma } from "@/db/index.db";
+import { credSchema, signUpSchema } from "@/lib/zod/user";
+import { authedMiddleware } from "@/middlewares/index.middleware";
+import { getToken } from "@/services/auth.service";
+import { publicProcedure } from "@/trpc";
+import { getHashedPassword } from "@/utils";
 
 export const userProcedure = publicProcedure.use(authedMiddleware);
 

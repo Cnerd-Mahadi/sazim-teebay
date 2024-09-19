@@ -1,5 +1,5 @@
-import { router } from "../trpc";
-import { signInUser, signUpUser } from "./../procedures/user.procedure";
+import { signInUser, signUpUser } from "@/procedures/user.procedure";
+import { router } from "@/trpc";
 
 export const userRouter = router({
 	signUp: signUpUser,

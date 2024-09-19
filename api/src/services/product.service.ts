@@ -1,4 +1,4 @@
-import { prisma } from "../db/index.db";
+import { prisma } from "@/db/index.db";
 
 export async function getProductbyID(productId: string) {
 	try {

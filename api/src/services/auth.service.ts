@@ -1,5 +1,5 @@
+import { parsedENV } from "@/utils";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { parsedENV } from "../utils";
 
 export function getToken(email: string) {
 	const token = jwt.sign(

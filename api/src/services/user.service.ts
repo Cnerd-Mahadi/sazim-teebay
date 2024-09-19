@@ -1,5 +1,5 @@
+import { prisma } from "@/db/index.db";
 import { JwtPayload } from "jsonwebtoken";
-import { prisma } from "../db/index.db";
 import { verifyToken } from "./auth.service";
 
 export async function getUserbyEmail(email: string) {

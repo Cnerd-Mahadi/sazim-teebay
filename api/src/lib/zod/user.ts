@@ -1,6 +1,6 @@
+import { checkUniqueEmail, getUserbyEmail } from "@/services/user.service";
+import { checkHashedPassword } from "@/utils";
 import { NEVER, z, ZodIssueCode } from "zod";
-import { checkUniqueEmail, getUserbyEmail } from "../../services/user.service";
-import { checkHashedPassword } from "./../../utils";
 
 export const signUpSchema = z.object({
 	fname: z.string().min(3),

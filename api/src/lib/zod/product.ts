@@ -1,6 +1,5 @@
+import { checkUniqueTitle } from "@/services/product.service";
 import { z } from "zod";
-import { checkUniqueTitle } from "../../services/product.service";
-
 export const productSchema = z.object({
 	title: z
 		.string()

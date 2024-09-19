@@ -1,14 +1,14 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import { prisma } from "../db/index.db";
+import { prisma } from "@/db/index.db";
 import {
 	productRentedSchema,
 	productSchema,
 	productSoldSchema,
 	updateProductSchema,
-} from "../lib/zod/product";
-import { getCurrentUser } from "../services/user.service";
-import { StatusCode } from "../utils";
+} from "@/lib/zod/product";
+import { getCurrentUser } from "@/services/user.service";
+import { StatusCode } from "@/utils";
+import { Request, Response } from "express";
+import { z } from "zod";
 
 export async function getListedProducts(req: Request, res: Response) {
 	try {
