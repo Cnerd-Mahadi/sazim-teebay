@@ -1,0 +1,7 @@
+[
+	{ "id": 1, "type": "Electronics" },
+	{ "id": 2, "type": "Toys" },
+	{ "id": 3, "type": "Sporting Goods" },
+	{ "id": 4, "type": "Phone" },
+	{ "id": 5, "type": "Computer" }
+]
