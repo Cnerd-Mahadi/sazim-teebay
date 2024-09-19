@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
-import "dotenv/config";
+import { config } from "dotenv";
 import { envSchema } from "./lib/zod/env";
+
+config({ path: ".env.local" });
 
 export enum StatusCode {
 	NotFound = 404,

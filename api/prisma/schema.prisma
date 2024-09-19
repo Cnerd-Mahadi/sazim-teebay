@@ -13,90 +13,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Status {
+enum ProductStatus {
   AVAILABLE
   NOT_AVAILABLE
 }
 
+enum RentCompletion {
+  COMPLETE
+  INCOMPLETE
+}
+
 model User {
-  id          String @id @default(uuid())
-  email       String @unique
-  password    String 
-  profile     Profile?
-  // products    Product[] 
-  // purchases   Purchase[]
-  // rentals     Rental[]
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  profile   Profile?
+  products  Product[]
+  purchases Purchase[]
+  rentals   Rental[]
+  activated Boolean    @default(true)
 }
 
-model Profile{
-  id          String @id @default(uuid())
-  fname       String
-  lname       String
-  address     String
-  dob         DateTime
-  phone       String
-  user        User @relation(fields: [userId], references: [id])
-  userId      String @unique
+model Profile {
+  id      String   @id @default(uuid())
+  fname   String
+  lname   String
+  address String
+  dob     DateTime
+  phone   String
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String   @unique
 }
 
-// model Product {
-//   id                String @id @default(uuid())
-//   title             String @unique
-//   description       String
-//   brand             Brand @relation(fields: [brandId], references: [id]) 
-//   brandId           String @unique 
-//   categories        CategoriesOnProducts[]
-//   price             Int
-//   rentPerHour       Int
-//   productStatus     ProductStatus?
-//   owner             User @relation(fields: [ownerId], references: [id])
-//   ownerId           String
-//   purchases         Purchase[]
-//   rentals           Rental[]
-//   viewCount         Int
-//   createdAt         DateTime @default(now())
-// }
+model Product {
+  id            String                 @id @default(uuid())
+  title         String                 @unique
+  description   String
+  brand         Brand                  @relation(fields: [brandId], references: [id])
+  brandId       String                 @unique
+  categories    CategoriesOnProducts[]
+  price         Int
+  rentPerHour   Int
+  productStatus ProductStatus
+  owner         User                   @relation(fields: [ownerId], references: [id])
+  ownerId       String
+  purchases     Purchase[]
+  rentals       Rental[]
+  viewCount     Int
+  createdAt     DateTime               @default(now())
+}
 
-// model ProductStatus {
-//   id        String @id @default(uuid())
-//   status    Status
-//   product   Product @relation(fields: [productId], references: [id])
-//   productId String @unique
-// }
+model Brand {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  products Product[]
+}
 
-// model Brand {
-//   id        String @id @default(uuid())
-//   name      String @unique
-//   products  Product[]
-// }
+model Category {
+  id       String                 @id @default(uuid())
+  type     String                 @unique
+  products CategoriesOnProducts[]
+}
 
-// model Category {
-//   id       String @id @default(uuid())
-//   type     String  @unique
-//   products CategoriesOnProducts[]
-// }
+model CategoriesOnProducts {
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
 
-// model CategoriesOnProducts {
-//   product    Product    @relation(fields: [productId], references: [id])
-//   productId  String
-//   category   Category @relation(fields: [categoryId], references: [id])
-//   categoryId String
+  @@id([productId, categoryId])
+}
 
-//   @@id([productId, categoryId])
-// }
+model Purchase {
+  id        String  @id @default(uuid())
+  buyer     User    @relation(fields: [buyerId], references: [id])
+  buyerId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+}
 
-// model Purchase {
-//   id          String @id @default(uuid())
-//   buyer       User @relation(fields: [buyerId], references: [id])
-//   buyerId     String 
-//   product     Product @relation(fields: [productId], references: [id])
-//   productId   String
-// }
-
-// model Rental {
-//   id          String @id @default(uuid())
-//   renter      User @relation(fields: [renterId], references: [id])
-//   renterId    String 
-//   product     Product @relation(fields: [productId], references: [id])
-//   productId   String
-// }
+model Rental {
+  id         String         @id @default(uuid())
+  renter     User           @relation(fields: [renterId], references: [id])
+  renterId   String
+  product    Product        @relation(fields: [productId], references: [id])
+  productId  String
+  hours      Int
+  completion RentCompletion
+}
