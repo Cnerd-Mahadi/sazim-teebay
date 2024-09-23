@@ -2,8 +2,8 @@ import { prisma } from "@/db/index.db";
 import { credSchema, signUpSchema } from "@/lib/zod/user";
 import { authedMiddleware } from "@/middlewares/index.middleware";
 import { getToken } from "@/services/auth.service";
-import { publicProcedure } from "@/trpc";
 import { getHashedPassword } from "@/utils";
+import { publicProcedure } from "./../trpc";
 
 export const userProcedure = publicProcedure.use(authedMiddleware);
 

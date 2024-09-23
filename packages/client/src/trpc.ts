@@ -1,12 +1,13 @@
-import { AppRouter } from "@server/routes/index.route";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
+import { AppRouter } from "teebay-common/src/types";
 import { getToken } from "./actions/auth";
 import { parsedENV } from "./utils";
 
 export const trpcLinks = [
 	httpBatchLink({
 		url: parsedENV.NEXT_PUBLIC_BASE_URL,
+		// transformer: SuperJSON,
 		async headers() {
 			const token = await getToken();
 			return {

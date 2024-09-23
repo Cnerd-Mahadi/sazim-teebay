@@ -13,6 +13,7 @@ export const createContext = async (opts: CreateExpressContextOptions) => {
 export type Context = Awaited<ReturnType<typeof createContext>>;
 
 const t = initTRPC.context<Context>().create({
+	// transformer: SuperJSON,
 	errorFormatter(opts) {
 		const { shape, error } = opts;
 		return {

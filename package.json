@@ -1,0 +1,16 @@
+{
+	"name": "teebay-root",
+	"private": true,
+	"version": "1.0.0",
+	"workspaces": [
+		"packages/*"
+	],
+	"description": "root folder for workspaces",
+	"keywords": [
+		"teebay",
+		"sazim",
+		"root"
+	],
+	"author": "cnerd",
+	"license": "MIT"
+}

@@ -39,6 +39,7 @@ export const credSchema = signInSchema.superRefine(async (val, ctx) => {
 	}
 	ctx.addIssue({
 		code: ZodIssueCode.custom,
+		// path: ["email"],
 		params: { errorType: "invalid-creds" },
 		message: "Invalid Credentials",
 	});
