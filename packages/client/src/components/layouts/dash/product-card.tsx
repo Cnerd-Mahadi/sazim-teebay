@@ -1,33 +1,32 @@
 "use client";
 
-import { incrementView } from "@/actions/product";
 import { organizeCategories } from "@/helpers/product";
-import { productSchemaType } from "@/types/product";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCookies } from "next-client-cookies";
+import { trpcClient, TRPCRouterOutput } from "@/trpc";
 import { useRouter } from "next/navigation";
 
-export const ProductCard = ({ product }: { product: productSchemaType }) => {
+export const ProductCard = ({
+	product,
+}: {
+	product: TRPCRouterOutput["product"]["productsListed"][number];
+}) => {
 	const router = useRouter();
-	const queryClient = useQueryClient();
-	const token = useCookies().get("token");
-	if (!token) throw new Error("Token not found!");
-	const { mutate } = useMutation({
+	const { mutate } = trpcClient.product.incrementView.useMutation({
 		mutationKey: ["product/viewInc"],
-		mutationFn: () => incrementView(product.id, token),
 		onSuccess: (data) => {
-			console.log(data);
-			queryClient.invalidateQueries({ queryKey: ["product/viewInc"] });
+			console.log(data.msg);
+		},
+		onError: async (response) => {
+			console.log(response.message);
 		},
 	});
 
-	const parsedDate = Date.parse(product.createdAt);
+	const parsedDate = product.createdAt;
 	const creationDate = new Date(parsedDate);
 
 	return (
 		<div
 			onClick={() => {
-				mutate();
+				mutate({ id: product.id });
 				router.push(`/product-details/${product.id}`);
 			}}>
 			<div className="flex flex-row justify-between items-start border-slate-400 hover:bg-zinc-100 px-8 py-4 md:py-6 border rounded-xl w-full max-w-3xl cursor-pointer">
@@ -47,10 +46,9 @@ export const ProductCard = ({ product }: { product: productSchemaType }) => {
 						<p className="pb-4 font-medium text-slate-400 text-sm">
 							<span className="text-slate-800">Price: </span>${product.price} |
 							Rent: ${product.rentPerHour}
-							{product.showDay ? " daily" : " hourly"}
 						</p>
-						<p className="pb-6 font-medium text-slate-500 text-sm">
-							{product.desc}
+						<p className="pb-6 font-medium text-justify text-slate-500 text-sm">
+							{product.description}
 						</p>
 						<div className="flex flex-row justify-between items-center">
 							<p className="font-medium text-slate-400 text-xs">

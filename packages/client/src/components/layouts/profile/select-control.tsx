@@ -5,35 +5,32 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { addProductInputs } from "@/types/product";
-import { Control } from "react-hook-form";
+import { DefaultOptionType } from "antd/es/select";
+import { Control, FieldPath, FieldValues } from "react-hook-form";
 import { SelectBrandInput } from "./select-brand-input";
-import { SelectRentTypeInput } from "./select-rent-type-input";
 
-interface SelectControlProps {
-	control: Control<addProductInputs>;
+interface SelectControlProps<T extends FieldValues> {
+	control: Control<T>;
 	label: string;
-	fieldname: keyof addProductInputs;
+	name: FieldPath<T>;
+	options: DefaultOptionType[];
 }
 
-export const SelectControl = ({
+export const SelectControl = <T extends FieldValues>({
 	control,
 	label,
-	fieldname,
-}: SelectControlProps) => {
+	name,
+	options,
+}: SelectControlProps<T>) => {
 	return (
 		<FormField
 			control={control}
-			name={fieldname}
+			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
 					<FormLabel>{label}</FormLabel>
 					<FormControl>
-						{fieldname === "brandId" ? (
-							<SelectBrandInput fieldName={fieldname} />
-						) : (
-							<SelectRentTypeInput fieldName={fieldname} />
-						)}
+						<SelectBrandInput field={field} options={options} />
 					</FormControl>
 					<FormMessage />
 				</FormItem>

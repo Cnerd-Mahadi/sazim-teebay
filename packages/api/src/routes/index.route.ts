@@ -1,10 +1,24 @@
-import { signInUser, signUpUser } from "@/procedures/user.procedure";
+import {
+	addProduct,
+	getBrands,
+	getCategories,
+	getListedProducts,
+	getProductByID,
+	increaseViewCount,
+	updateProduct,
+	validateProductTitle,
+} from "@/procedures/product.procedure";
+import {
+	getProductsByUser,
+	signInUser,
+	signUpUser,
+} from "@/procedures/user.procedure";
 import { router } from "@/trpc";
 
 export const userRouter = router({
 	signUp: signUpUser,
 	signIn: signInUser,
-	// productsUser:
+	productsUser: getProductsByUser,
 	// productsBought:
 	// productsSold:
 	// productsRented:
@@ -12,16 +26,17 @@ export const userRouter = router({
 	// test: test,
 });
 export const productRouter = router({
-	// brands:
-	// categories:
-	// productsListed:
-	// product:
-	// addProduct:
-	// editProduct:
+	brands: getBrands,
+	categories: getCategories,
+	productsListed: getListedProducts,
+	product: getProductByID,
+	validateProductTitle: validateProductTitle,
+	addProduct: addProduct,
+	updateProduct: updateProduct,
 	// deleteProduct:
 	// buyProduct:
 	// rentProduct:
-	// incrementView:
+	incrementView: increaseViewCount,
 });
 
 export const appRouter = router({

@@ -10,6 +10,7 @@
 		"prisma:seed": "yarn dotenv ts-node -r tsconfig-paths/register ./prisma/seed.ts",
 		"prisma:migrate": "yarn dotenv prisma migrate dev",
 		"prisma:studio": "yarn dotenv prisma studio",
+		"prisma:reset": "yarn dotenv prisma migrate reset",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [
@@ -30,7 +31,8 @@
 		"prisma": "^5.14.0",
 		"superjson": "^1.13.3",
 		"tsc-alias": "^1.8.10",
-		"zod": "^3.23.8"
+		"zod": "^3.23.8",
+		"teebay-common": "*"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.10.0",

@@ -41,7 +41,9 @@ export const SignUpForm = () => {
 			router.push("/signin");
 		},
 		onError: async (response) => {
+			console.log(response.data?.zodError);
 			const validationError = formatZodCustomError(response.data?.zodError);
+			console.log(validationError);
 			if (validationError && validationError.type === "unique-email") {
 				form.setError("email", {
 					type: "custom",

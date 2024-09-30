@@ -6,24 +6,21 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { addProductInputs } from "@/types/product";
-import { Control } from "react-hook-form";
+import { Control, FieldPath, FieldValues } from "react-hook-form";
 
-interface ProductInputFieldProps {
-	control: Control<addProductInputs>;
+type ProductInputFieldProps<T extends FieldValues> = {
+	control: Control<T>;
 	label: string;
-	name: keyof addProductInputs;
-	type?: string;
-	triggerValidation: () => void;
-}
+	name: FieldPath<T>;
+	type?: "number" | "text";
+};
 
-export const ProductInputField = ({
+export const ProductInputField = <T extends FieldValues>({
 	control,
 	label,
 	name,
-	type,
-	triggerValidation,
-}: ProductInputFieldProps) => {
+	type = "text",
+}: ProductInputFieldProps<T>) => {
 	return (
 		<FormField
 			control={control}
@@ -34,16 +31,8 @@ export const ProductInputField = ({
 					<FormControl>
 						<Input
 							{...field}
-							type={type ? type : "text"}
+							type={type}
 							placeholder={label}
-							onChange={(event) => {
-								field.onChange(
-									type === "number"
-										? parseInt(event.target.value)
-										: event.target.value
-								);
-								triggerValidation();
-							}}
 							className="py-5 pr-10 w-full"
 						/>
 					</FormControl>

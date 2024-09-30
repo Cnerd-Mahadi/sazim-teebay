@@ -36,3 +36,18 @@ export async function checkUniqueTitle(title: string) {
 	}
 	return true;
 }
+
+export async function checkUniqueTitleUpdated(title: string, userId: string) {
+	const product = await prisma.product.findFirst({
+		where: {
+			title: title,
+			NOT: {
+				ownerId: userId,
+			},
+		},
+	});
+	if (product) {
+		return false;
+	}
+	return true;
+}

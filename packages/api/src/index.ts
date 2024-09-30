@@ -4,7 +4,7 @@ import express from "express";
 import { appRouter } from "./routes/index.route";
 import { createContext } from "./trpc";
 
-const port = 3000;
+const port = 3008;
 
 const app = express();
 

@@ -1,35 +1,18 @@
 "use client";
 
-import { getProductsUser } from "@/actions/product";
-import { selects, useSelect } from "@/contexts/user-select-context";
-import { productSchemaType } from "@/types/product";
-import { useQuery } from "@tanstack/react-query";
-import { useCookies } from "next-client-cookies";
+import { selects, useUserSidebar } from "@/contexts/user-sidebar-context";
+import { trpcClient } from "@/trpc";
 import { ProductCardUser } from "./product-card-user";
 
 export const ProductUser = () => {
-	const { choice } = useSelect();
-	const token = useCookies().get("token");
-	if (!token) throw new Error("Token not found!");
-	const { data, isLoading } = useQuery({
-		queryKey: ["user-data", choice],
-		queryFn: async () => await getProductsUser(choice, token),
-	});
-
+	const { choice, setChoice } = useUserSidebar();
+	const currentFetch = selects.find((item) => item.key === choice)?.fetch;
+	const { data, isLoading } = trpcClient.user[selects[0].fetch].useQuery();
 	if (isLoading) return <>Loading..</>;
 
-	return data && data.length > 0 ? (
-		data.map((item: any) => {
-			return (
-				<ProductCardUser
-					key={item.id}
-					product={
-						(choice === selects[0].key
-							? item
-							: item.product) as productSchemaType
-					}
-				/>
-			);
+	return data ? (
+		data.map((item) => {
+			return <ProductCardUser key={item.id} product={item} />;
 		})
 	) : (
 		<>No Product Found</>

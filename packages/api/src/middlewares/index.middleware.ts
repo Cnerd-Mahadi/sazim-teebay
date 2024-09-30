@@ -10,7 +10,11 @@ export const authedMiddleware = middleware(async ({ ctx, next }) => {
 	if (!user) throw new Error("No user found!");
 	return next({
 		ctx: {
-			user: user,
+			user: {
+				id: user.id,
+				email: user.email,
+				activated: user.activated,
+			},
 		},
 	});
 });

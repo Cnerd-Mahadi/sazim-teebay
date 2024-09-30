@@ -1,5 +1,6 @@
 import { checkUniqueEmail, getUserbyEmail } from "@/services/user.service";
 import { checkHashedPassword } from "@/utils";
+import { validationType } from "teebay-common/src/index";
 import { NEVER, z, ZodIssueCode } from "zod";
 
 export const signUpSchema = z.object({
@@ -17,8 +18,9 @@ export const signUpSchema = z.object({
 				return isUnique;
 			},
 			{
+				path: [validationType.SERVER_ZOD_VALIDATION],
 				message: "Email already exist",
-				params: { errorType: "unique-email" },
+				params: { error_type: "unique-email" },
 			}
 		),
 	password: z.string().min(5),
@@ -39,8 +41,8 @@ export const credSchema = signInSchema.superRefine(async (val, ctx) => {
 	}
 	ctx.addIssue({
 		code: ZodIssueCode.custom,
-		// path: ["email"],
-		params: { errorType: "invalid-creds" },
+		path: [validationType.SERVER_ZOD_VALIDATION],
+		params: { error_type: "invalid-creds" },
 		message: "Invalid Credentials",
 	});
 	return NEVER;

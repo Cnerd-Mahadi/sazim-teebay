@@ -1,5 +1,6 @@
 import { isUserValid } from "@/actions/auth";
 import { Navbar } from "@/components/layouts/partials/navbar";
+import { ProductOptionsProvider } from "@/contexts/product-options-context";
 import { redirect } from "next/navigation";
 
 export default async function PublicLayout({
@@ -12,7 +13,7 @@ export default async function PublicLayout({
 	return (
 		<main className="bg-neutral-50 min-h-screen">
 			<Navbar />
-			{children}
+			<ProductOptionsProvider>{children}</ProductOptionsProvider>
 		</main>
 	);
 }

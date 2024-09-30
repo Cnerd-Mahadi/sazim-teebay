@@ -1,4 +1,3 @@
-import { getCategories } from "@/actions/product";
 import {
 	FormControl,
 	FormField,
@@ -6,33 +5,23 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { addProductInputs, categoryType } from "@/types/product";
-import { useQuery } from "@tanstack/react-query";
-import { useCookies } from "next-client-cookies";
-import { Control } from "react-hook-form";
+import { DefaultOptionType } from "antd/es/select";
+import { Control, FieldPath, FieldValues } from "react-hook-form";
 import { ProductCategoryMultiSelect } from "./product-category-multi-select";
 
-interface ProductCategoryControl {
-	control: Control<addProductInputs>;
+type ProductCategoryControlProps<T extends FieldValues> = {
+	control: Control<T>;
 	label: string;
-	name: keyof addProductInputs;
-}
+	name: FieldPath<T>;
+	options: DefaultOptionType[];
+};
 
-export const ProductCategoryControl = ({
+export const ProductCategoryControl = <T extends FieldValues>({
 	control,
 	label,
 	name,
-}: ProductCategoryControl) => {
-	const token = useCookies().get("token");
-	if (!token) throw new Error("Token not found!");
-
-	const { data, isLoading } = useQuery({
-		queryKey: ["categories"],
-		queryFn: async () => await getCategories(token),
-	});
-
-	if (isLoading) return <>Loading..</>;
-
+	options,
+}: ProductCategoryControlProps<T>) => {
 	return (
 		<FormField
 			control={control}
@@ -41,10 +30,7 @@ export const ProductCategoryControl = ({
 				<FormItem className="w-full">
 					<FormLabel>{label}</FormLabel>
 					<FormControl>
-						<ProductCategoryMultiSelect
-							list={data as categoryType[]}
-							fieldName={name}
-						/>
+						<ProductCategoryMultiSelect field={field} options={options} />
 					</FormControl>
 					<FormMessage />
 				</FormItem>

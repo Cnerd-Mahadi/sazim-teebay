@@ -7,22 +7,26 @@ import {
 	DialogHeader,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { ProductFormContext } from "@/contexts/product-form-context";
+import { TRPCRouterOutput } from "@/trpc";
 import { useState } from "react";
-import { ProductForm } from "./product-form";
+import { ProductEditForm } from "./product-form/product-edit-form";
 
-export const DialogCreateProduct = () => {
+export const DialogEditProduct = ({
+	product,
+}: {
+	product: TRPCRouterOutput["product"]["productsListed"][number];
+}) => {
 	const [open, setOpen] = useState(false);
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button className="bg-slate-700">Create Product</Button>
+				<Button variant={"outline"} className="px-12">
+					Edit
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="p-20 w-full max-w-3xl">
 				<DialogHeader></DialogHeader>
-				<ProductFormContext>
-					<ProductForm setOpen={setOpen} />
-				</ProductFormContext>
+				<ProductEditForm product={product} setOpen={setOpen} />
 			</DialogContent>
 		</Dialog>
 	);

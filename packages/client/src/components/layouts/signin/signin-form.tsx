@@ -30,6 +30,7 @@ export const SignInForm = () => {
 		onSuccess: async (response) => {
 			if (response && response.token) {
 				Cookies.set("token", response.token);
+				Cookies.set("user", JSON.stringify(response.user));
 				router.push("/");
 			}
 		},

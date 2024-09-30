@@ -1,28 +1,44 @@
-import { checkUniqueTitle } from "@/services/product.service";
+import {
+	checkUniqueTitle,
+	checkUniqueTitleUpdated,
+} from "@/services/product.service";
+import { validationType } from "teebay-common/src";
+import { productFormSchema } from "teebay-common/src/zod/index";
 import { z } from "zod";
-export const productSchema = z.object({
-	title: z
-		.string()
-		.min(3)
-		.refine(
-			async (value) => {
-				const isUnique = await checkUniqueTitle(value);
-				console.log(value, isUnique);
-				return isUnique;
-			},
-			{ message: "Title already exist" }
-		),
-	desc: z.string().min(20),
-	categories: z.string().array(),
-	brandId: z.string(),
-	price: z.number().int().gt(100),
-	rentPerHour: z.number().int().gt(10),
-	showDay: z.boolean(),
+
+export const productSchema = productFormSchema.extend({
+	title: productFormSchema.shape.title.refine(
+		async (value) => {
+			const isUnique = await checkUniqueTitle(value);
+			console.log(value, isUnique);
+			return isUnique;
+		},
+		{
+			path: [validationType.SERVER_ZOD_VALIDATION],
+			params: { error_type: "unique-title" },
+			message: "Title already exist",
+		}
+	),
 });
 
-export const updateProductSchema = productSchema.extend({
-	productId: z.string(),
-});
+export const productTitleValidationSchema = productSchema.pick({ title: true });
+export const updateProductSchema = productSchema
+	.extend({
+		productId: z.string(),
+		userId: z.string(),
+		title: z.string().min(3),
+	})
+	.refine(
+		async (value) => {
+			const isUnique = await checkUniqueTitleUpdated(value.title, value.userId);
+			return isUnique;
+		},
+		{
+			path: [validationType.SERVER_ZOD_VALIDATION],
+			params: { error_type: "unique-title" },
+			message: "Title already exist",
+		}
+	);
 
 export const productSoldSchema = z.object({
 	productId: z.string(),

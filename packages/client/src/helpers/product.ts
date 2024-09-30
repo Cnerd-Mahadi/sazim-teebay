@@ -1,10 +1,8 @@
-import { productSchema } from "@/lib/zod/product";
-import { z } from "zod";
+import { TRPCRouterOutput } from "@/trpc";
 
-const categories = productSchema.shape.categories;
-type categoryType = z.infer<typeof categories>;
-
-export const organizeCategories = (categories: categoryType) => {
+export const organizeCategories = (
+	categories: TRPCRouterOutput["product"]["productsListed"][0]["categories"]
+) => {
 	let categoryText = "";
 	categories.forEach((item) => {
 		categoryText += ` ${item.category.type},`;

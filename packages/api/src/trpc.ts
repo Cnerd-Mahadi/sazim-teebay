@@ -1,5 +1,6 @@
 import { initTRPC } from "@trpc/server";
 import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import SuperJSON from "superjson";
 import { ZodError } from "zod";
 import { verifyToken } from "./services/auth.service";
 
@@ -13,7 +14,7 @@ export const createContext = async (opts: CreateExpressContextOptions) => {
 export type Context = Awaited<ReturnType<typeof createContext>>;
 
 const t = initTRPC.context<Context>().create({
-	// transformer: SuperJSON,
+	transformer: SuperJSON,
 	errorFormatter(opts) {
 		const { shape, error } = opts;
 		return {
