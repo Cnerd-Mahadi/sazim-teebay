@@ -52,6 +52,7 @@ export const ProductEditForm = ({
 	const { mutate } = trpcClient.product.updateProduct.useMutation({
 		onSuccess: async (response) => {
 			console.log(response.msg);
+			setOpen(false);
 		},
 		onError: async (response) => {
 			console.log(response.data?.zodError);
@@ -68,11 +69,12 @@ export const ProductEditForm = ({
 	});
 
 	const onSubmit = (values: z.infer<typeof updateProductFormSchema>) => {
-		console.log(values, product.id);
+		console.log(values, product.productId);
 		mutate({
 			...values,
-			productId: product.id,
+			productId: product.productId,
 			userId: user.id,
+			deletedAt: product.deletedAt,
 		});
 	};
 	return (

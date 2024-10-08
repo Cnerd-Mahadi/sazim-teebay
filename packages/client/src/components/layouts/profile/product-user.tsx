@@ -1,19 +1,36 @@
 "use client";
 
-import { selects, useUserSidebar } from "@/contexts/user-sidebar-context";
-import { trpcClient } from "@/trpc";
+import { useUserSidebar } from "@/contexts/user-sidebar-context";
+import { UserChoiceHooks } from "@/hooks/user-choice-hooks";
+import { TRPCRouterOutput } from "@/trpc";
 import { ProductCardUser } from "./product-card-user";
 
 export const ProductUser = () => {
-	const { choice, setChoice } = useUserSidebar();
-	const currentFetch = selects.find((item) => item.key === choice)?.fetch;
-	const { data, isLoading } = trpcClient.user[selects[0].fetch].useQuery();
-	if (isLoading) return <>Loading..</>;
+	const { choice } = useUserSidebar();
+	console.log(choice);
+	const response = UserChoiceHooks({ choice: choice });
+	if (!response) {
+		throw new Error("Error");
+	}
+	const { data, isLoading } = response;
 
-	return data ? (
-		data.map((item) => {
-			return <ProductCardUser key={item.id} product={item} />;
-		})
+	if (isLoading) return <>Loading...</>;
+
+	return data && data.length ? (
+		choice === "library" ? (
+			(data as TRPCRouterOutput["user"]["productsUser"]).map((item) => {
+				return <ProductCardUser key={item.productId} product={item} />;
+			})
+		) : (
+			(data as TRPCRouterOutput["user"]["productsBought"]).map((item) => {
+				return (
+					<ProductCardUser
+						key={item.product.productId}
+						product={item.product}
+					/>
+				);
+			})
+		)
 	) : (
 		<>No Product Found</>
 	);

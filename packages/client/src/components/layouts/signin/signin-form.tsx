@@ -8,6 +8,7 @@ import { trpcClient } from "@/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import Cookies from "js-cookie";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -68,12 +69,20 @@ export const SignInForm = () => {
 						type="submit"
 						size={"lg"}
 						disabled={form.formState.isSubmitting || isPending}
-						className="flex flex-row bg-violet-600 hover:bg-violet-500 mx-auto w-full max-w-64">
+						className="flex flex-row bg-violet-600 hover:bg-violet-500 mx-auto mb-4 w-full max-w-64">
 						{(form.formState.isSubmitting || isPending) && (
 							<ReloadIcon className="mr-2 w-4 h-4 animate-spin" />
 						)}
 						Sign In
 					</Button>
+					<Link href={"/signup"}>
+						<Button
+							type="button"
+							size={"lg"}
+							className="flex flex-row border-violet-600 bg-transparent hover:bg-slate-100 mx-auto border w-full max-w-64 text-violet-600">
+							Sign Up
+						</Button>
+					</Link>
 				</div>
 			</form>
 		</Form>

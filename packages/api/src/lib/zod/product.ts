@@ -27,6 +27,7 @@ export const updateProductSchema = productSchema
 		productId: z.string(),
 		userId: z.string(),
 		title: z.string().min(3),
+		deletedAt: z.bigint(),
 	})
 	.refine(
 		async (value) => {
@@ -40,6 +41,11 @@ export const updateProductSchema = productSchema
 		}
 	);
 
+export const deleteProductSchema = z.object({
+	productId: z.string(),
+	deletedAt: z.literal(0),
+});
+
 export const productSoldSchema = z.object({
 	productId: z.string(),
 	sellerId: z.string(),
@@ -47,6 +53,6 @@ export const productSoldSchema = z.object({
 
 export const productRentedSchema = z.object({
 	productId: z.string(),
-	ownerId: z.string(),
-	rentHourDuration: z.number().int(),
+	deletedAt: z.literal(0),
+	hours: z.number().gte(1),
 });

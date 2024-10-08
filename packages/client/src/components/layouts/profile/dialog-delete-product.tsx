@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteProduct } from "@/actions/product";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -10,35 +9,26 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { trpcClient } from "@/trpc";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { QueryClient, useMutation } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
-import { useCookies } from "next-client-cookies";
 import { useState } from "react";
 
-export function DialogDeleteProduct({ productId }: { productId: string }) {
+export const DialogDeleteProduct = ({ productId }: { productId: string }) => {
 	const [open, setOpen] = useState(false);
-	const token = useCookies().get("token");
-	const queryClient = new QueryClient();
-	if (!token) throw new Error("Token not found!");
-	const { mutate, isPending } = useMutation({
-		mutationKey: ["delete/product"],
-		mutationFn: async (productId: string) =>
-			await deleteProduct(productId, token),
-		onSuccess: (data) => {
-			console.log(data);
-			queryClient.invalidateQueries({ queryKey: ["delete/product"] });
+	const { mutate, isPending } = trpcClient.product.deleteProduct.useMutation({
+		onSuccess: async (response) => {
+			console.log(response.msg);
 			setOpen(false);
+		},
+		onError: async (response) => {
+			console.log(response.message);
 		},
 	});
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					size="icon"
-					onClick={() => console.log("DO")}
-					className="top-4 right-4 absolute bg-transparent px-2">
+				<Button variant={"outline"} className="px-12">
 					<Trash className="w-4 h-4" />
 				</Button>
 			</DialogTrigger>
@@ -50,7 +40,12 @@ export function DialogDeleteProduct({ productId }: { productId: string }) {
 				</DialogHeader>
 				<DialogFooter className="pt-10">
 					<Button
-						onClick={() => mutate(productId)}
+						onClick={() =>
+							mutate({
+								deletedAt: 0,
+								productId: productId,
+							})
+						}
 						disabled={isPending}
 						className="bg-slate-700 hover:bg-slate-800 px-6">
 						{isPending && <ReloadIcon className="mr-2 w-4 h-4 animate-spin" />}
@@ -65,4 +60,4 @@ export function DialogDeleteProduct({ productId }: { productId: string }) {
 			</DialogContent>
 		</Dialog>
 	);
-}
+};

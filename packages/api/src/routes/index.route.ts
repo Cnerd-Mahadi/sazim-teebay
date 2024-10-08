@@ -1,15 +1,24 @@
 import {
 	addProduct,
+	buyProduct,
+	deleteProduct,
 	getBrands,
 	getCategories,
 	getListedProducts,
 	getProductByID,
+	getUserProductByID,
 	increaseViewCount,
+	processRentCompletion,
+	rentProduct,
 	updateProduct,
 	validateProductTitle,
 } from "@/procedures/product.procedure";
 import {
+	getProductsBoughtByUser,
 	getProductsByUser,
+	getProductsLentByUser,
+	getProductsRentedByUser,
+	getProductsSoldByUser,
 	signInUser,
 	signUpUser,
 } from "@/procedures/user.procedure";
@@ -19,23 +28,24 @@ export const userRouter = router({
 	signUp: signUpUser,
 	signIn: signInUser,
 	productsUser: getProductsByUser,
-	// productsBought:
-	// productsSold:
-	// productsRented:
-	// productsLent:
-	// test: test,
+	productsBought: getProductsBoughtByUser,
+	productsSold: getProductsSoldByUser,
+	productsRented: getProductsRentedByUser,
+	productsLent: getProductsLentByUser,
 });
 export const productRouter = router({
 	brands: getBrands,
 	categories: getCategories,
 	productsListed: getListedProducts,
 	product: getProductByID,
+	userProduct: getUserProductByID,
 	validateProductTitle: validateProductTitle,
 	addProduct: addProduct,
 	updateProduct: updateProduct,
-	// deleteProduct:
-	// buyProduct:
-	// rentProduct:
+	deleteProduct: deleteProduct,
+	buyProduct: buyProduct,
+	rentProduct: rentProduct,
+	rentCompletion: processRentCompletion,
 	incrementView: increaseViewCount,
 });
 
@@ -45,5 +55,3 @@ export const appRouter = router({
 });
 
 export type AppRouter = typeof appRouter;
-
-// TRPC endpoint API structure example -> user.getSomething

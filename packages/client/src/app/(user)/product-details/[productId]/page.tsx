@@ -1,3 +1,5 @@
+import { DialogBuyCard } from "@/components/layouts/dash/dialog-buy-card";
+import { DialogRentCard } from "@/components/layouts/dash/dialog-rent-card";
 import { organizeCategories } from "@/helpers/product";
 import { trpcServer } from "@/trpc";
 
@@ -47,8 +49,8 @@ export default async function page({
 				</div>
 			</div>
 			<div className="flex flex-row justify-center items-center gap-6 self-end">
-				{/* <DialogBuyCard product={product} /> */}
-				{/* <DialogRentCard product={product} /> */}
+				<DialogBuyCard product={product} />
+				<DialogRentCard product={product} />
 			</div>
 		</div>
 	);

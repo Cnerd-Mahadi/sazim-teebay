@@ -46,21 +46,23 @@ model Profile {
 }
 
 model Product {
-  id            String                 @id @default(uuid())
-  title         String                 @unique
-  description   String
-  brand         Brand                  @relation(fields: [brandId], references: [id])
-  brandId       String
-  categories    CategoriesOnProducts[]
-  price         Int
-  rentPerHour   Int
-  productStatus ProductStatus
-  owner         User                   @relation(fields: [ownerId], references: [id])
-  ownerId       String
-  purchases     Purchase[]
-  rentals       Rental[]
-  viewCount     Int
-  createdAt     DateTime               @default(now())
+  productId   String                 @default(uuid())
+  title       String                 @unique
+  description String
+  brand       Brand                  @relation(fields: [brandId], references: [id])
+  brandId     String
+  categories  CategoriesOnProducts[]
+  price       Int
+  rentPerHour Int
+  owner       User                   @relation(fields: [ownerId], references: [id])
+  ownerId     String
+  purchases   Purchase[]
+  rentals     Rental[]
+  viewCount   Int                    @default(0)
+  createdAt   DateTime               @default(now())
+  deletedAt   BigInt                 @default(0)
+
+  @@id([productId, deletedAt])
 }
 
 model Brand {
@@ -76,28 +78,32 @@ model Category {
 }
 
 model CategoriesOnProducts {
-  product    Product  @relation(fields: [productId], references: [id], onDelete: NoAction)
-  productId  String
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: NoAction)
-  categoryId String
+  product          Product  @relation(fields: [productProductId, productDeletedAt], references: [productId, deletedAt])
+  productProductId String
+  productDeletedAt BigInt
+  category         Category @relation(fields: [categoryId], references: [id])
+  categoryId       String
 
-  @@id([productId, categoryId])
+  @@id([productProductId, productDeletedAt, categoryId])
 }
 
 model Purchase {
-  id        String  @id @default(uuid())
-  buyer     User    @relation(fields: [buyerId], references: [id])
-  buyerId   String
-  product   Product @relation(fields: [productId], references: [id])
-  productId String
+  id               String  @id @default(uuid())
+  buyer            User    @relation(fields: [buyerId], references: [id])
+  buyerId          String
+  product          Product @relation(fields: [productProductId, productDeletedAt], references: [productId, deletedAt])
+  productProductId String
+  productDeletedAt BigInt
 }
 
 model Rental {
-  id         String         @id @default(uuid())
-  renter     User           @relation(fields: [renterId], references: [id])
-  renterId   String
-  product    Product        @relation(fields: [productId], references: [id])
-  productId  String
-  hours      Int
-  completion RentCompletion
+  id               String         @id @default(uuid())
+  renter           User           @relation(fields: [renterId], references: [id])
+  renterId         String
+  product          Product        @relation(fields: [productProductId, productDeletedAt], references: [productId, deletedAt])
+  productProductId String
+  productDeletedAt BigInt
+  hours            Int
+  startsAt         DateTime       @default(now())
+  completion       RentCompletion
 }

@@ -10,11 +10,11 @@ import {
 } from "react";
 
 export const selects = [
-	{ key: "library", label: "Library", fetch: "productsUser" },
-	{ key: "buy", label: "Buy", fetch: "productsBought" },
-	{ key: "sell", label: "Sell", fetch: "productsSold" },
-	{ key: "rent", label: "Rent", fetch: "productsRented" },
-	{ key: "lend", label: "Lend", fetch: "productsLent" },
+	{ key: "library", label: "Library" },
+	{ key: "buy", label: "Bought" },
+	{ key: "sell", label: "Sold" },
+	{ key: "rent", label: "Rented" },
+	{ key: "lend", label: "Lent" },
 ] as const;
 
 export type KEY_TYPE = (typeof selects)[number]["key"];

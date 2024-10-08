@@ -5,6 +5,8 @@ import Image from "next/image";
 
 export default async function page() {
 	const products = await trpcServer.product.productsListed.query();
+	const response = await trpcServer.product.rentCompletion.query();
+	console.log(response);
 	return (
 		<main>
 			<section className="flex flex-row justify-between items-center mx-auto mb-5 px-32 py-20 rounded-b-3xl max-w-screen-2xl">
@@ -25,7 +27,9 @@ export default async function page() {
 					All Product
 				</div>
 				{products.length > 0 &&
-					products.map((item) => <ProductCard key={item.id} product={item} />)}
+					products.map((item) => (
+						<ProductCard key={item.productId} product={item} />
+					))}
 			</section>
 		</main>
 	);

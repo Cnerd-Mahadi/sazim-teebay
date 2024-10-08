@@ -1,44 +1,24 @@
+import { convertStringToDate } from "@/utils/date-time";
+import dayjs from "dayjs";
 import { productFormSchema } from "teebay-common/src/zod";
 import { z } from "zod";
 
 export const updateProductFormSchema = productFormSchema;
-// .omit({ brandId: true })
-// .extend({
-// 	categories: z
-// 		.array(
-// 			z.object({
-// 				id: z.string(),
-// 				type: z.string(),
-// 			})
-// 		)
-// 		.min(1),
-// 	brand: z
-// 		.object({
-// 			id: z.string(),
-// 			name: z.string(),
-// 		})
-// 		.required(),
-// });
 
-// export const productSchema = productFormSchema.extend({
-// 	id: z.string(),
-// 	ownerId: z.string(),
-// 	viewCount: z.number(),
-// 	showDay: z.boolean(),
-// 	createdAt: z.string(),
-// 	categories: z.array(
-// 		z.object({
-// 			category: z.object({
-// 				id: z.string(),
-// 				type: z.string(),
-// 			}),
-// 		})
-// 	),
-// 	brand: z.object({
-// 		id: z.string(),
-// 		name: z.string(),
-// 	}),
-// });
+export const productRentFormSchema = z.object({
+	date: z
+		.string()
+		.datetime({ offset: true })
+		.refine(
+			(value) => {
+				const hours = convertStringToDate(value).diff(dayjs().format(), "h");
+				return hours >= 1;
+			},
+			{
+				message: "Rent duration must be more than one hour",
+			}
+		),
+});
 
 export const brandSchema = z.object({
 	id: z.string(),

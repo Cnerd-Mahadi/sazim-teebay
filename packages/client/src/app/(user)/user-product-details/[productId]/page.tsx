@@ -1,3 +1,4 @@
+import { DialogDeleteProduct } from "@/components/layouts/profile/dialog-delete-product";
 import { DialogEditProduct } from "@/components/layouts/profile/dialog-edit-product";
 import { organizeCategories } from "@/helpers/product";
 import { trpcServer } from "@/trpc";
@@ -7,7 +8,7 @@ export default async function page({
 }: {
 	params: { productId: string };
 }) {
-	const product = await trpcServer.product.product.query({
+	const product = await trpcServer.product.userProduct.query({
 		productId: params.productId,
 	});
 	if (!product) return <>No Product</>;
@@ -20,8 +21,11 @@ export default async function page({
 				<h3 className="ml-auto font-bold text-3xl text-slate-800">
 					Product Details
 				</h3>
-				<div className="ml-auto">
+				<div className="flex flex-row gap-2 ml-auto">
 					<DialogEditProduct product={product} />
+					{Number(product.deletedAt) === 0 && (
+						<DialogDeleteProduct productId={product.productId} />
+					)}
 				</div>
 			</div>
 			<div className="pb-16">

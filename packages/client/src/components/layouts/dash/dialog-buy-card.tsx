@@ -1,6 +1,5 @@
 "use client";
 
-import { buyProduct } from "@/actions/product";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -10,28 +9,32 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { productSchemaType } from "@/types/product";
+import { trpcClient, TRPCRouterOutput } from "@/trpc";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { useMutation } from "@tanstack/react-query";
-import { useCookies } from "next-client-cookies";
 import { useState } from "react";
 
-export function DialogBuyCard({ product }: { product: productSchemaType }) {
+export function DialogBuyCard({
+	product,
+}: {
+	product: TRPCRouterOutput["product"]["productsListed"][number];
+}) {
 	const [open, setOpen] = useState(false);
-	const token = useCookies().get("token");
-	if (!token) throw new Error("Token not found!");
-	const { mutate, isPending } = useMutation({
-		mutationFn: async (product: productSchemaType) =>
-			await buyProduct(product, token),
-		onSuccess: (data) => {
-			console.log(data);
+	const { mutate, isPending } = trpcClient.product.buyProduct.useMutation({
+		onSuccess: (response) => {
+			console.log(response.msg);
 			setOpen(false);
 		},
+		onError: (response) => {
+			console.log(response.message);
+		},
 	});
+
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button className="border-2 border-slate-400 bg-transparent shadow-none px-6 font-medium text-slate-700 hover:text-white">
+				<Button
+					size={"sm"}
+					className="border-2 border-slate-400 bg-transparent shadow-none px-6 font-medium text-slate-700 hover:text-white">
 					Buy
 				</Button>
 			</DialogTrigger>
@@ -41,7 +44,7 @@ export function DialogBuyCard({ product }: { product: productSchemaType }) {
 				</DialogHeader>
 				<DialogFooter className="pt-10">
 					<Button
-						onClick={() => mutate(product)}
+						onClick={() => mutate({ productId: product.productId })}
 						disabled={isPending}
 						className="bg-slate-700 hover:bg-slate-800 px-6">
 						{isPending && <ReloadIcon className="mr-2 w-4 h-4 animate-spin" />}

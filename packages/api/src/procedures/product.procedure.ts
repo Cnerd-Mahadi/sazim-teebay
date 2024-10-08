@@ -1,10 +1,13 @@
 import { prisma } from "@/db/index.db";
 import {
+	deleteProductSchema,
+	productRentedSchema,
 	productSchema,
 	productTitleValidationSchema,
 	updateProductSchema,
 } from "@/lib/zod/product";
-import { ProductStatus } from "@prisma/client";
+import { getProductbyID, isDurationExpired } from "@/services/product.service";
+import { RentCompletion } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { userProcedure } from "./user.procedure";
@@ -29,8 +32,6 @@ export const addProduct = userProcedure
 					brandId,
 					price,
 					rentPerHour,
-					productStatus: ProductStatus.AVAILABLE,
-					viewCount: 0,
 					categories: {
 						create: categories.map((item) => {
 							return {
@@ -66,25 +67,31 @@ export const updateProduct = userProcedure
 				price,
 				rentPerHour,
 				productId,
+				deletedAt,
 			} = input;
 
 			await prisma.$transaction(async (tx) => {
 				await tx.categoriesOnProducts.deleteMany({
 					where: {
-						productId: productId,
+						productProductId: productId,
+						productDeletedAt: deletedAt,
 					},
 				});
 				await tx.categoriesOnProducts.createMany({
 					data: categories.map((item) => {
 						return {
 							categoryId: item,
-							productId: productId,
+							productProductId: productId,
+							productDeletedAt: deletedAt,
 						};
 					}),
 				});
 				await tx.product.update({
 					where: {
-						id: productId,
+						productId_deletedAt: {
+							productId: productId,
+							deletedAt: deletedAt,
+						},
 					},
 					data: {
 						title,
@@ -106,10 +113,39 @@ export const updateProduct = userProcedure
 		}
 	});
 
+export const deleteProduct = userProcedure
+	.input(deleteProductSchema)
+	.mutation(async ({ input }) => {
+		try {
+			const { productId, deletedAt } = input;
+
+			await prisma.product.update({
+				where: {
+					productId_deletedAt: {
+						productId: productId,
+						deletedAt: deletedAt,
+					},
+				},
+				data: {
+					deletedAt: Date.now(),
+				},
+			});
+
+			return { msg: "Product deleted successfully" };
+		} catch (error) {
+			console.error(error);
+			throw new TRPCError({
+				code: "INTERNAL_SERVER_ERROR",
+				message: "Product couldnt be deleted",
+			});
+		}
+	});
+
 export const getListedProducts = userProcedure.query(async ({ ctx }) => {
 	try {
 		const products = await prisma.product.findMany({
 			where: {
+				deletedAt: 0,
 				NOT: {
 					ownerId: ctx.user.id,
 				},
@@ -139,7 +175,8 @@ export const getProductByID = userProcedure
 		try {
 			const product = await prisma.product.findFirst({
 				where: {
-					id: input.productId,
+					productId: input.productId,
+					deletedAt: 0,
 				},
 				include: {
 					categories: {
@@ -160,153 +197,114 @@ export const getProductByID = userProcedure
 		}
 	});
 
-// export async function editProduct(req: Request, res: Response) {
-// 	const body = req.body;
-// 	const raw = {
-// 		title: body.title,
-// 		desc: body.desc,
-// 		categories: body.categories,
-// 		brandId: body.brandId,
-// 		price: body.price,
-// 		rentPerHour: body.rentPerHour,
-// 		showDay: body.showDay,
-// 		productId: body.productId,
-// 	};
-// 	const refined = updateProductSchema.safeParse(raw);
-// 	if (refined.success) {
-// 		try {
-// 			const {
-// 				productId,
-// 				title,
-// 				desc,
-// 				categories,
-// 				brandId,
-// 				price,
-// 				rentPerHour,
-// 				showDay,
-// 			} = refined.data;
-// 			await prisma.product.update({
-// 				where: { id: productId },
-// 				data: {
-// 					title: {
-// 						set: title,
-// 					},
-// 					desc: {
-// 						set: desc,
-// 					},
-// 					brandId: {
-// 						set: brandId,
-// 					},
-// 					price: {
-// 						set: price,
-// 					},
-// 					rentPerHour: {
-// 						set: rentPerHour,
-// 					},
-// 					showDay: {
-// 						set: showDay,
-// 					},
-// 					categories: {
-// 						deleteMany: {
-// 							productId: productId,
-// 						},
-// 						create: categories.map((item) => {
-// 							return {
-// 								category: {
-// 									connect: {
-// 										id: item,
-// 									},
-// 								},
-// 							};
-// 						}),
-// 					},
-// 				},
-// 			});
-// 			return res
-// 				.status(StatusCode.Success)
-// 				.json({ msg: "Product updated successfully" });
-// 		} catch (error) {
-// 			console.error(error);
-// 			return res
-// 				.status(StatusCode.ServerError)
-// 				.json({ msg: "Product couldnt be updated" });
-// 		}
-// 	}
-// 	return res.status(StatusCode.Invalid).json({
-// 		msg: "Invalid data",
-// 		error: refined.error,
-// 	});
-// }
+export const getUserProductByID = userProcedure
+	.input(z.object({ productId: z.string() }))
+	.query(async ({ input }) => {
+		try {
+			const product = await prisma.product.findFirst({
+				where: {
+					productId: input.productId,
+				},
+				include: {
+					categories: {
+						include: {
+							category: true,
+						},
+					},
+					brand: true,
+				},
+			});
+			return product;
+		} catch (error) {
+			console.error(error);
+			throw new TRPCError({
+				code: "INTERNAL_SERVER_ERROR",
+				message: "Product couldnt be fetched",
+			});
+		}
+	});
 
-// export async function buyProduct(req: Request, res: Response) {
-// 	const body = req.body;
-// 	const raw = {
-// 		productId: body.productId,
-// 		sellerId: body.sellerId,
-// 	};
-// 	const refined = productSoldSchema.safeParse(raw);
-// 	if (refined.success) {
-// 		try {
-// 			const user = await getCurrentUser(req.headers.authorization);
-// 			const { productId, sellerId } = refined.data;
-// 			await prisma.productSold.create({
-// 				data: {
-// 					buyerId: user.id,
-// 					productId: productId,
-// 					sellerId: sellerId,
-// 				},
-// 			});
-// 			return res
-// 				.status(StatusCode.Success)
-// 				.json({ msg: "Product bought successfully" });
-// 		} catch (error) {
-// 			console.error(error);
-// 			return res
-// 				.status(StatusCode.ServerError)
-// 				.json({ msg: " Product couldnt be bought" });
-// 		}
-// 	}
-// 	return res.status(StatusCode.Invalid).json({
-// 		msg: "Invalid data",
-// 		error: refined.error,
-// 	});
-// }
+export const buyProduct = userProcedure
+	.input(
+		z.object({
+			productId: z.string(),
+		})
+	)
+	.mutation(async ({ input, ctx }) => {
+		try {
+			const product = await getProductbyID(input.productId);
+			if (!product)
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Product is not available",
+				});
+			await prisma.$transaction(async (tx) => {
+				const productSold = await tx.product.update({
+					where: {
+						productId_deletedAt: {
+							productId: input.productId,
+							deletedAt: 0,
+						},
+					},
+					data: {
+						deletedAt: Date.now(),
+					},
+				});
+				await tx.purchase.create({
+					data: {
+						buyerId: ctx.user.id,
+						productProductId: input.productId,
+						productDeletedAt: productSold.deletedAt,
+					},
+				});
+			});
+			return { msg: "Product bought successfully" };
+		} catch (error) {
+			console.error(error);
+			throw new TRPCError({
+				code: "INTERNAL_SERVER_ERROR",
+				message: "Product couldnt be bought",
+			});
+		}
+	});
 
-// export async function rentProduct(req: Request, res: Response) {
-// 	const body = req.body;
-// 	const raw = {
-// 		productId: body.productId,
-// 		ownerId: body.ownerId,
-// 		rentHourDuration: body.rentHourDuration,
-// 	};
-// 	const refined = productRentedSchema.safeParse(raw);
-// 	if (refined.success) {
-// 		try {
-// 			const user = await getCurrentUser(req.headers.authorization);
-// 			const { productId, ownerId, rentHourDuration } = refined.data;
-// 			await prisma.productRented.create({
-// 				data: {
-// 					productId: productId,
-// 					renterId: user.id,
-// 					ownerId: ownerId,
-// 					rentHourDuration: rentHourDuration,
-// 				},
-// 			});
-// 			return res
-// 				.status(StatusCode.Success)
-// 				.json({ msg: "Product rented successfully" });
-// 		} catch (error) {
-// 			console.error(error);
-// 			return res
-// 				.status(StatusCode.ServerError)
-// 				.json({ msg: " Product couldnt be rented" });
-// 		}
-// 	}
-// 	return res.status(StatusCode.Invalid).json({
-// 		msg: "Invalid data",
-// 		error: refined.error,
-// 	});
-// }
+export const rentProduct = userProcedure
+	.input(productRentedSchema)
+	.mutation(({ input, ctx }) => {
+		const { productId, hours } = input;
+		try {
+			prisma.$transaction(async (tx) => {
+				const product = await tx.product.update({
+					where: {
+						productId_deletedAt: {
+							productId: productId,
+							deletedAt: 0,
+						},
+					},
+					data: {
+						deletedAt: Date.now(),
+					},
+				});
+				await tx.rental.create({
+					data: {
+						productProductId: productId,
+						productDeletedAt: product.deletedAt,
+						renterId: ctx.user.id,
+						hours: hours,
+						completion: RentCompletion.INCOMPLETE,
+					},
+				});
+			});
+
+			return { msg: "Product rented successfully" };
+		} catch (error) {
+			console.error(error);
+			throw new TRPCError({
+				code: "INTERNAL_SERVER_ERROR",
+				message: "Product couldnt be rented",
+			});
+		}
+	});
 
 export const increaseViewCount = userProcedure
 	.input(
@@ -318,7 +316,10 @@ export const increaseViewCount = userProcedure
 		try {
 			await prisma.product.update({
 				where: {
-					id: input.id,
+					productId_deletedAt: {
+						productId: input.id,
+						deletedAt: 0,
+					},
 				},
 				data: {
 					viewCount: { increment: 1 },
@@ -333,6 +334,54 @@ export const increaseViewCount = userProcedure
 			});
 		}
 	});
+
+export const processRentCompletion = userProcedure.query(() => {
+	try {
+		prisma.$transaction(async (tx) => {
+			const rentalsIncompleted = await tx.rental.findMany({
+				where: { completion: RentCompletion.INCOMPLETE },
+				include: {
+					product: true,
+				},
+			});
+			await Promise.all(
+				rentalsIncompleted.map(async (item) => {
+					await tx.rental.updateMany({
+						where: {
+							id: item.id,
+						},
+						data: {
+							completion: isDurationExpired(item.startsAt, item.hours)
+								? RentCompletion.COMPLETE
+								: RentCompletion.INCOMPLETE,
+						},
+					});
+					await tx.product.updateMany({
+						where: {
+							rentals: {
+								some: {
+									id: item.id,
+								},
+							},
+						},
+						data: {
+							deletedAt: isDurationExpired(item.startsAt, item.hours)
+								? 0
+								: item.product.deletedAt,
+						},
+					});
+				})
+			);
+		});
+		return { msg: "Rent completion done!" };
+	} catch (error) {
+		console.log(error);
+		throw new TRPCError({
+			code: "INTERNAL_SERVER_ERROR",
+			message: "Rent completion couldnt be processed",
+		});
+	}
+});
 
 export const getBrands = userProcedure.query(async () => {
 	try {

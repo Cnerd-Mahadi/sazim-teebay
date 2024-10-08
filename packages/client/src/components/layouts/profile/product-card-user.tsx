@@ -7,12 +7,13 @@ export const ProductCardUser = ({
 }: {
 	product: TRPCRouterOutput["product"]["productsListed"][number];
 }) => {
+	console.log(product);
 	const parsedDate = product.createdAt;
 	const creationDate = new Date(parsedDate);
 	return (
 		<div className="relative">
 			{/* <DialogDeleteProduct productId={product.id} /> */}
-			<Link href={`/user-product-details/${product.id}`}>
+			<Link href={`/user-product-details/${product.productId}`}>
 				<div className="flex flex-row justify-between items-start border-slate-400 hover:bg-zinc-100 px-8 py-4 md:py-6 border rounded-xl w-full max-w-3xl cursor-pointer">
 					<div className="flex flex-row justify-between items-start gap-5">
 						<div>
